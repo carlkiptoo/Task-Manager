@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
+use App\Mail\TaskAssigned;
 
 class TaskController extends Controller
 {
@@ -42,7 +43,7 @@ class TaskController extends Controller
 
         // Optionally send notification
         $assignedUser = User::find($request->assigned_to);
-        // Mail::to($assignedUser->email)->send(new TaskAssigned($task)); // ← implement this later
+        Mail::to($assignedUser->email)->send(new TaskAssigned($task)); 
 
         return response()->json(['message' => 'Task created successfully', 'task' => $task], Response::HTTP_CREATED);
     }
