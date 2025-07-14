@@ -46,4 +46,23 @@ class TaskController extends Controller
 
         return response()->json(['message' => 'Task created successfully', 'task' => $task], Response::HTTP_CREATED);
     }
+
+    public function show($id)
+    {
+        $task = Task::with('assignedUser')->find($id);
+
+        if (!$task) {
+            return response()->json(['error' => 'Task not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        $user = Auth::user();
+
+        if (!$user->isAdmin() || $user->id === $task->assigned_to) {
+            return response()->json($task, Response::HTTP_OK);
+        }
+
+        return response()->json(['error' => 'Unauthorized'], Response::HTTP_FORBIDDEN);
+    }
+
+
 }
