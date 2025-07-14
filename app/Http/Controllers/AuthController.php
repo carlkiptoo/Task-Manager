@@ -37,4 +37,24 @@ class AuthController extends Controller
 
         return response()->json(['message' => 'User registered successfully', 'user' => $user], Response::HTTP_CREATED);
     }
+
+    public function login(Request $request)
+    {
+        $credentials = $request->only('email', 'password');
+
+        if (!Auth::attempt($credentials)) {
+            return response()->json(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        $user = Auth::user();
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'message' => 'Login successful',
+            'user' => $user,
+            'token' => $token
+        ], Response::HTTP_OK);
+        
+
+    }
 }
