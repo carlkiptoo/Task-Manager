@@ -16,7 +16,7 @@ class TaskController extends Controller
     {
         $user = Auth::user();
 
-        $tasks = $user->isAdmin() ? Task::with('assignedUser')->latest()->get() : $user->tasks()->latest()->get();
+        $tasks = $user->isAdmin() ? Task::with('user')->latest()->get() : $user->tasks()->latest()->get();
 
         return response()->json($tasks, Response::HTTP_OK);
     }
@@ -49,7 +49,7 @@ class TaskController extends Controller
 
     public function show($id)
     {
-        $task = Task::with('assignedUser')->find($id);
+        $task = Task::with('user')->find($id);
 
         if (!$task) {
             return response()->json(['error' => 'Task not found'], Response::HTTP_NOT_FOUND);
@@ -57,7 +57,7 @@ class TaskController extends Controller
 
         $user = Auth::user();
 
-        if (!$user->isAdmin() || $user->id === $task->assigned_to) {
+        if (!$user->isAdmin() && $user->id === $task->assigned_to) {
             return response()->json($task, Response::HTTP_OK);
         }
 

@@ -13,7 +13,7 @@ class Task extends Model
     protected $fillable = [
         'title',
         'description',
-        'status',
+        'status' => 'pending',
         'assigned_to',
         'deadline',
     ];
