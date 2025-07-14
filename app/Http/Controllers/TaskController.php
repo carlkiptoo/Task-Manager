@@ -64,5 +64,47 @@ class TaskController extends Controller
         return response()->json(['error' => 'Unauthorized'], Response::HTTP_FORBIDDEN);
     }
 
+    public function update(Request $request, $id)
+    {
+        $task = Task::find($id);
+
+        if (!$task) {
+            return response()->json(['error' => 'Task not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        $user = Auth::user();
+
+        if($user->isAdmin()) {
+            $validator = Validator::make($request->all(), [
+                'title' => 'sometimes|required|string|max:255',
+                'description' => 'nullable|string',
+                'status' => 'sometimes|required|in:pending,in_progress,completed',
+                'assigned_to' => 'sometimes|required|exists:users,id',
+                'deadline' => 'sometimes|required|date',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->errors()], Response::HTTP_UNPROCESSABLE_ENTITY);
+            }
+
+            $task->update($request->only(['title', 'description', 'status', 'assigned_to', 'deadline']));
+
+            return response()->json(['message' => 'Task updated successfully', 'task' => $task], Response::HTTP_OK);
+        } elseif($user->id === $task->assigned_to) {
+            $validator = Validator::make($request->all(), [
+                'status' => 'required|in:pending,in_progress,completed',
+            ]);
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->errors()], Response::HTTP_UNPROCESSABLE_ENTITY);
+            }
+
+            $task->update(['status' => $request->status]);
+            return response()->json(['message' => 'Task status updated successfully', 'task' => $task], Response::HTTP_OK);
+        }
+
+        return response()->json(['error' => 'Unauthorized'], Response::HTTP_FORBIDDEN);
+
+    }
+
 
 }
