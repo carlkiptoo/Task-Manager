@@ -106,5 +106,23 @@ class TaskController extends Controller
 
     }
 
+    public function destroy($id) 
+    {
+        $task = Task::find($id);
+
+        if (!$task) {
+            return response()->json(['error' => 'Task not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        $user = Auth::user();
+
+        if ($user->isAdmin() || $user->id === $task->assigned_to) {
+            $task->delete();
+            return response()->json(['message' => 'Task deleted successfully'], Response::HTTP_OK);
+        }
+
+        return response()->json(['error' => 'Unauthorized'], Response::HTTP_FORBIDDEN);
+    }
+
 
 }
